@@ -4,7 +4,7 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 import pickle
-from tensorflow.keras.models import load_model
+import tensorflow as tf
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 # Global variables
@@ -12,12 +12,13 @@ sentiment_model = None
 sentiment_tokenizer = None
 sentiment_encoder = None
 
+
 def load_model_and_resources():
     global sentiment_model, sentiment_tokenizer, sentiment_encoder
 
     try:
         # Load the model
-        sentiment_model = load_model('sentiment_model.h5')
+        sentiment_model = tf.keras.models.load_model('sentiment_model.h5')
 
         # Load tokenizer and encoder
         with open('sentiment_tokenizer.pkl', 'rb') as file:
@@ -33,6 +34,7 @@ def load_model_and_resources():
         st.toast(f"Error loading resources: {e}", icon="❌")
         sentiment_model = None  # Reset to None if loading fails
 
+
 # Load model and resources only when required
 while sentiment_model is None or sentiment_tokenizer is None or sentiment_encoder is None:
     load_model_and_resources()
@@ -40,7 +42,6 @@ while sentiment_model is None or sentiment_tokenizer is None or sentiment_encode
     # If the model is still not loaded after an attempt, wait for 1 second and retry
     if sentiment_model is None or sentiment_tokenizer is None or sentiment_encoder is None:
         time.sleep(1)
-
 
 # Define the maximum sequence length
 MAX_SEQUENCE_LENGTH = 100
