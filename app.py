@@ -4,20 +4,13 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 import pickle
-from keras.models import load_model
-from keras.preprocessing.sequence import pad_sequences
+from tensorflow.keras.models import load_model
+from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 # Global variables
 sentiment_model = None
 sentiment_tokenizer = None
 sentiment_encoder = None
-
-
-# Function to load the model and associated files
-import time
-import streamlit as st
-from keras.models import load_model
-import pickle
 
 def load_model_and_resources():
     global sentiment_model, sentiment_tokenizer, sentiment_encoder
