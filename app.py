@@ -1,18 +1,53 @@
+import time
+import os
 import streamlit as st
 import numpy as np
 import pandas as pd
 import pickle
 from keras.models import load_model
 from tensorflow.keras.preprocessing.sequence import pad_sequences
-global data
-# Load the trained model, tokenizer, and sentiment encoder
-sentiment_model = load_model('sentiment_model.h5')  # Update the file path if necessary
 
-with open('sentiment_tokenizer.pkl', 'rb') as file:
-    sentiment_tokenizer = pickle.load(file)
+# Global variables
+sentiment_model = None
+sentiment_tokenizer = None
+sentiment_encoder = None
 
-with open('sentiment_encoder.pkl', 'rb') as file:
-    sentiment_encoder = pickle.load(file)
+
+# Function to load the model and associated files
+import time
+import streamlit as st
+from keras.models import load_model
+import pickle
+
+def load_model_and_resources():
+    global sentiment_model, sentiment_tokenizer, sentiment_encoder
+
+    try:
+        # Load the model
+        sentiment_model = load_model('sentiment_model.h5')
+
+        # Load tokenizer and encoder
+        with open('sentiment_tokenizer.pkl', 'rb') as file:
+            sentiment_tokenizer = pickle.load(file)
+        with open('sentiment_encoder.pkl', 'rb') as file:
+            sentiment_encoder = pickle.load(file)
+
+        # Once loaded, show success message
+        st.toast("Model and resources loaded successfully!", icon="✅")
+
+    except Exception as e:
+        # Show error message if loading fails
+        st.toast(f"Error loading resources: {e}", icon="❌")
+        sentiment_model = None  # Reset to None if loading fails
+
+# Load model and resources only when required
+while sentiment_model is None or sentiment_tokenizer is None or sentiment_encoder is None:
+    load_model_and_resources()
+
+    # If the model is still not loaded after an attempt, wait for 1 second and retry
+    if sentiment_model is None or sentiment_tokenizer is None or sentiment_encoder is None:
+        time.sleep(1)
+
 
 # Define the maximum sequence length
 MAX_SEQUENCE_LENGTH = 100
@@ -53,7 +88,9 @@ elif input_type == "Upload Excel/CSV File":
 
 # Button to analyze sentiment
 if st.button("Analyze Sentiment"):
-    if input_type == "One-Line Sentence" and user_input:
+    if sentiment_model is None:
+        st.warning("The model is not loaded yet. Please wait until it's ready.")
+    elif input_type == "One-Line Sentence" and user_input:
         # Preprocess single input
         sentiment_test_sequences = sentiment_tokenizer.texts_to_sequences([user_input])
         sentiment_test_padded_sequences = pad_sequences(
@@ -125,12 +162,11 @@ if st.button("Analyze Sentiment"):
             st.download_button(
                 label="Download Processed File",
                 data=data.to_csv(index=False),
-                file_name="sentiment_analysis_results.csv",
+                file_name=f"{os.path.splitext(uploaded_file.name)[0]}_sentiment_analysis_results.csv",
                 mime="text/csv"
             )
+            st.toast("File downloaded successfully!", icon="✅")
         except Exception as e:
             st.error(f"An error occurred: {e}")
     else:
         st.warning("Please provide a valid input for sentiment analysis.")
-
-
