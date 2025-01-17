@@ -6,7 +6,11 @@ import pandas as pd
 import pickle
 import tensorflow as tf
 from tensorflow.keras.preprocessing.sequence import pad_sequences
-
+# Configure the page (tab name and icon)
+st.set_page_config(
+    page_title="TweetVibeTracker",  # Tab name
+    page_icon="🌟",  # Tab icon (you can use emojis or upload your own favicon)
+)
 # Global variables
 sentiment_model = None
 sentiment_tokenizer = None
